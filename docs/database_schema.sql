@@ -1,0 +1,21 @@
+CREATE TABLE Monitors (
+    Id SERIAL PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Url TEXT NOT NULL,
+    IsActive BOOLEAN DEFAULT TRUE,
+    IntervalSeconds INTEGER NOT NULL,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE CheckLogs(
+    Id SERIAL PRIMARY KEY,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    StatusCode INTEGER,
+    ResponseTimeMs INTEGER,
+    IsSuccess BOOLEAN,
+    Response TEXT,
+    MonitorId INTEGER,
+    FOREIGN KEY (MonitorId) REFERENCES Monitors (Id) ON DELETE CASCADE
+);
+
+CREATE INDEX IX_CheckLogs_MonitorId ON CheckLogs(MonitorId);
