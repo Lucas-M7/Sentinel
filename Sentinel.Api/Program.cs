@@ -1,7 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+using Sentinel.Api.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<AppDbContext>(options => 
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
