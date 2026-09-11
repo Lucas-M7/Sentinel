@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Sentinel.Api.Data;
+using Sentinel.Api.Repositories;
+using Sentinel.Api.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseNpgsql(connectionString));
+
+builder.Services.AddScoped<IMonitorRepository, MonitorRepository>();
 
 var app = builder.Build();
 
