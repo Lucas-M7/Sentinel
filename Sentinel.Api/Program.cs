@@ -4,6 +4,7 @@ using Sentinel.Api.Repositories;
 using Sentinel.Api.Repositories.Interfaces;
 using Sentinel.Api.Services;
 using Sentinel.Api.Services.Interfaces;
+using Sentinel.Api.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IMonitorRepository, MonitorRepository>();
 builder.Services.AddScoped<IMonitorService, MonitorService>();
+builder.Services.AddScoped<ICheckLogRepository, CheckLogRepository>();
+
+builder.Services.AddHostedService<UptimeCheckerWorker>();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
