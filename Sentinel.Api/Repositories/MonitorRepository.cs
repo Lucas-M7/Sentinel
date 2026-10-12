@@ -31,6 +31,14 @@ public class MonitorRepository(AppDbContext context) : IMonitorRepository
         return await _context.Monitors.FirstOrDefaultAsync(m => m.Id == id);
     }
 
+    public async Task<IEnumerable<Monitor>> GetMonitorsReadyForCheckAsync(DateTimeOffset currentTime)
+    {
+        return await _context.Monitors
+            .Where(m => m.IsActive && m.NextCheckAt <= currentTime)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task UpdateAsync(Monitor monitor)
     {
         _context.Monitors.Update(monitor);

@@ -9,4 +9,5 @@ public interface IMonitorRepository
     Task AddAsync(Monitor monitor);
     Task UpdateAsync(Monitor monitor);
     Task DeleteAsync(Monitor monitor);
+    Task<IEnumerable<Monitor>> GetMonitorsReadyForCheckAsync(DateTimeOffset currentTime);
 }

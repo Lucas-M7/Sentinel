@@ -21,13 +21,12 @@ public class UptimeCheckerWorker(
 
             using (var scope = _scopeFactory.CreateScope())
             {
-                var repository = scope.ServiceProvider.GetRequiredService<IMonitorRepository>();
+                var monitorRepository = scope.ServiceProvider.GetRequiredService<IMonitorRepository>();
                 var logRepository = scope.ServiceProvider.GetRequiredService<ICheckLogRepository>();
 
-                var allMonitors = await repository.GetAllAsync();
-                var activeMonitors = allMonitors.Where(m => m.IsActive);
+                var monitorsToCheck = await monitorRepository.GetMonitorsReadyForCheckAsync(DateTimeOffset.UtcNow);
 
-                foreach (var monitor in activeMonitors)
+                foreach (var monitor in monitorsToCheck)
                 {
                     _logger.LogInformation("Verificando site: {Nome} - {Url}", monitor.Name, monitor.Url);
 
@@ -73,10 +72,13 @@ public class UptimeCheckerWorker(
 
                         await logRepository.AddAsync(logErro);
                     }
+
+                    monitor.ScheduleNextCheck();
+                    await monitorRepository.UpdateAsync(monitor);
                 }
             }
 
-            await Task.Delay(5000, stoppingToken);
+            await Task.Delay(1000, stoppingToken);
         }
     }
 }

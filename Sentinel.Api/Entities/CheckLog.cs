@@ -12,7 +12,10 @@ public class CheckLog
 
     public Monitor Monitor { get; private set; } = null!;
 
-    protected CheckLog () { }
+    protected CheckLog (int id)
+    {
+        Id = id;
+    }
 
     public CheckLog(int monitorId, int statusCode, int responseTimeMs, bool isSuccess, string response)
     {
