@@ -34,4 +34,11 @@ public class MonitorsController(IMonitorService service) : ControllerBase
             return StatusCode(500, new { message = "Ocorreu um erro interno no servidor."});
         }
     }
+
+    [HttpGet("{id}/logs")]
+    public async Task<IActionResult> GetMonitorLogs(int id)
+    {
+        var result = await _service.GetMonitorLogsAsync(id);
+        return Ok(result);
+    }
 }
