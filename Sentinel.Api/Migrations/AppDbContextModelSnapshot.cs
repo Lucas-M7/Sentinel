@@ -77,6 +77,9 @@ namespace Sentinel.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset>("NextCheckAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");

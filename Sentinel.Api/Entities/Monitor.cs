@@ -8,6 +8,7 @@ public class Monitor
     public bool IsActive { get; private set; }
     public int IntervalSeconds { get; private set; }
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+    public DateTimeOffset NextCheckAt { get; private set; }
     
     public ICollection<CheckLog> CheckLogs { get; private set; } = new List<CheckLog>();
 
@@ -20,6 +21,7 @@ public class Monitor
         IntervalSeconds = intervalSeconds;
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
+        NextCheckAt = DateTimeOffset.UtcNow;
     }
 
     public void UpdateDetails(string name, string url, int intervalSeconds)
@@ -27,6 +29,11 @@ public class Monitor
         Name = name;
         Url = url;
         IntervalSeconds = intervalSeconds;
+    }
+
+    public void ScheduleNextCheck()
+    {
+        NextCheckAt = DateTimeOffset.UtcNow.AddSeconds(IntervalSeconds);
     }
 
     public void Pause() => IsActive = false;
