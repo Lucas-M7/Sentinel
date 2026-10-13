@@ -5,7 +5,7 @@ using Sentinel.Api.Repositories.Interfaces;
 namespace Sentinel.Api.Workers;
 
 public class UptimeCheckerWorker(
-    ILogger<UptimeCheckerWorker> logger, 
+    ILogger<UptimeCheckerWorker> logger,
     IServiceScopeFactory scopeFactory,
     IHttpClientFactory httpClientFactory) : BackgroundService
 {
@@ -28,7 +28,7 @@ public class UptimeCheckerWorker(
 
                 foreach (var monitor in monitorsToCheck)
                 {
-                    _logger.LogInformation("Verificando site: {Nome} - {Url}", monitor.Name, monitor.Url);
+                    _logger.LogInformation("🔍 Verificando site: {Nome} ({Url})", monitor.Name, monitor.Url);
 
                     var client = _httpClientFactory.CreateClient();
                     var stopWatch = Stopwatch.StartNew();
@@ -41,16 +41,25 @@ public class UptimeCheckerWorker(
                         var statusCode = (int)response.StatusCode;
                         var responseTime = (int)stopWatch.ElapsedMilliseconds;
                         var isSuccess = response.IsSuccessStatusCode;
+                        var responseMessage = !string.IsNullOrWhiteSpace(response.ReasonPhrase)
+                            ? response.ReasonPhrase
+                            : (isSuccess ? "OK" : $"HTTP Status {statusCode}");
 
-                        _logger.LogInformation
-                            ("Site {Nome} retornou status {StatusCode} em {Tempo}ms", monitor.Name, statusCode, responseTime);
+                        if (isSuccess)
+                        {
+                            _logger.LogInformation("🟢 [SUCESSO] {Nome} -> Status: {StatusCode} | Latência: {Tempo}ms", monitor.Name, statusCode, responseTime);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("🟡 [ALERTA] {Nome} retornou status HTTP {StatusCode} em {Tempo}ms", monitor.Name, statusCode, responseTime);
+                        }
 
                         var log = new CheckLog(
                             monitor.Id,
                             statusCode,
                             responseTime,
                             isSuccess,
-                            "OK"
+                            responseMessage
                         );
 
                         await logRepository.AddAsync(log);
@@ -60,8 +69,7 @@ public class UptimeCheckerWorker(
                         stopWatch.Stop();
                         var responseTime = (int)stopWatch.ElapsedMilliseconds;
 
-                        _logger.LogError("Erro ao verificar site {Nome}: {Erro}", monitor.Name, ex.Message);
-
+                        _logger.LogError("🔴 [FALHA DE REDE] {Nome} -> Erro: {Erro}", monitor.Name, ex.Message);
                         var logErro = new CheckLog(
                             monitor.Id,
                             0,

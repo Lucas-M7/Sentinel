@@ -5,8 +5,16 @@ using Sentinel.Api.Repositories.Interfaces;
 using Sentinel.Api.Services;
 using Sentinel.Api.Services.Interfaces;
 using Sentinel.Api.Workers;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
