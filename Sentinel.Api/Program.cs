@@ -29,6 +29,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IMonitorRepository, MonitorRepository>();
 builder.Services.AddScoped<IMonitorService, MonitorService>();
 builder.Services.AddScoped<ICheckLogRepository, CheckLogRepository>();
+builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddHostedService<UptimeCheckerWorker>();
 builder.Services.AddHttpClient();

@@ -59,7 +59,8 @@ public class UptimeCheckerWorker(
                             statusCode,
                             responseTime,
                             isSuccess,
-                            responseMessage
+                            responseMessage,
+                            DateTimeOffset.UtcNow
                         );
 
                         await logRepository.AddAsync(log);
@@ -75,13 +76,14 @@ public class UptimeCheckerWorker(
                             0,
                             responseTime,
                             false,
-                            ex.Message
+                            ex.Message,
+                            DateTimeOffset.UtcNow
                         );
 
                         await logRepository.AddAsync(logErro);
                     }
 
-                    monitor.ScheduleNextCheck();
+                    monitor.ScheduleNextCheck(DateTimeOffset.UtcNow);
                     await monitorRepository.UpdateAsync(monitor);
                 }
             }

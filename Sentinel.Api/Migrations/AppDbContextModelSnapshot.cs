@@ -30,7 +30,7 @@ namespace Sentinel.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsSuccess")
@@ -41,7 +41,8 @@ namespace Sentinel.Api.Migrations
 
                     b.Property<string>("Response")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("ResponseTimeMs")
                         .HasColumnType("integer");
@@ -51,9 +52,10 @@ namespace Sentinel.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MonitorId");
+                    b.HasIndex("MonitorId", "CreatedAt")
+                        .IsDescending(false, true);
 
-                    b.ToTable("CheckLogs");
+                    b.ToTable("CheckLogs", (string)null);
                 });
 
             modelBuilder.Entity("Sentinel.Api.Entities.Monitor", b =>
@@ -64,7 +66,7 @@ namespace Sentinel.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("IntervalSeconds")
@@ -75,18 +77,22 @@ namespace Sentinel.Api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTimeOffset>("NextCheckAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Monitors");
+                    b.HasIndex("IsActive", "NextCheckAt");
+
+                    b.ToTable("Monitors", (string)null);
                 });
 
             modelBuilder.Entity("Sentinel.Api.Entities.CheckLog", b =>

@@ -7,7 +7,10 @@ namespace Sentinel.Api.Data;
 public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
+    
     public DbSet<Monitor> Monitors => Set<Monitor>();
     public DbSet<CheckLog> CheckLogs => Set<CheckLog>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 }

@@ -13,10 +13,7 @@ public class MonitorService(
 
     public async Task<Monitor> CreateMonitorAsync(string name, string url, int intervalSeconds)
     {
-        if (intervalSeconds < 10)
-            throw new ArgumentException("O intervalo mínimo permitido é de 10 segundos.");
-
-        var newMonitor = new Monitor(name, url, intervalSeconds);
+        var newMonitor = new Monitor(name, url, intervalSeconds, DateTimeOffset.UtcNow);
 
         await _repository.AddAsync(newMonitor);
         return newMonitor;
