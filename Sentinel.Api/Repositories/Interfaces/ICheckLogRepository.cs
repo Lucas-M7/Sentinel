@@ -4,6 +4,6 @@ namespace Sentinel.Api.Repositories.Interfaces;
 
 public interface ICheckLogRepository
 {
-    Task AddAsync(CheckLog checkLog);
-    Task<IEnumerable<CheckLog>> GetLogsByMonitorIdAsync(int monitorId, int limit = 50);
+    void Add(CheckLog checkLog);
+    Task<IReadOnlyList<CheckLog>> GetLogsByMonitorIdAsync(int monitorId, int limit = 50, CancellationToken ct = default);
 }

@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Sentinel.Api.Application.Common;
 using Sentinel.Api.Entities;
 using Monitor = Sentinel.Api.Entities.Monitor;
 
 namespace Sentinel.Api.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : DbContext, IUnitOfWork
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     

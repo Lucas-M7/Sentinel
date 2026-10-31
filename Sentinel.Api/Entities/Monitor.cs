@@ -41,20 +41,23 @@ public class Monitor
     }
 
     private void Apply(string name, string url, int intervalSeconds)
-    {
-        Name = name.Trim();
-        Url = url.Trim();
-        IntervalSeconds = intervalSeconds;
-        
-        if (string.IsNullOrWhiteSpace(name) || name.Length > NameMaxLength)
-            throw new DomainException($"O nome é obrigatório e deve ter até {NameMaxLength} caracteres.");
+{
+    name = name?.Trim() ?? string.Empty;
+    url = url?.Trim() ?? string.Empty;
 
-        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)
-            || uri.Scheme is not ("http" or "https")
-            || url.Length > UrlMaxLength)
-            throw new DomainException("A URL deve ser absoluta, http ou https.");
+    if (name.Length == 0 || name.Length > NameMaxLength)
+        throw new DomainException($"O nome é obrigatório e deve ter até {NameMaxLength} caracteres.");
 
-        if (intervalSeconds < MinIntervalSeconds)
-            throw new DomainException($"O intervalo mínimo permitido é de {MinIntervalSeconds} segundos.");
-    }
+    if (url.Length > UrlMaxLength
+        || !Uri.TryCreate(url, UriKind.Absolute, out var uri)
+        || uri.Scheme is not ("http" or "https"))
+        throw new DomainException("A URL deve ser absoluta, http ou https.");
+
+    if (intervalSeconds < MinIntervalSeconds)
+        throw new DomainException($"O intervalo mínimo permitido é de {MinIntervalSeconds} segundos.");
+
+    Name = name;
+    Url = url;
+    IntervalSeconds = intervalSeconds;
+}
 }

@@ -7,41 +7,23 @@ namespace Sentinel.Api.Repositories;
 
 public class MonitorRepository(AppDbContext context) : IMonitorRepository
 {
-    private readonly AppDbContext _context = context;
+    public async Task<IReadOnlyList<Monitor>> GetAllAsync(CancellationToken ct = default)
+        => await context.Monitors.AsNoTracking().OrderBy(m => m.Id).ToListAsync(ct);
 
-    public async Task AddAsync(Monitor monitor)
-    {
-        await _context.Monitors.AddAsync(monitor);
-        await _context.SaveChangesAsync();
-    }
+    public Task<Monitor?> GetByIdAsync(int id, CancellationToken ct = default)
+        => context.Monitors.FirstOrDefaultAsync(m => m.Id == id, ct);
 
-    public async Task DeleteAsync(Monitor monitor)
-    {
-        _context.Monitors.Remove(monitor);
-        await _context.SaveChangesAsync();
-    }
+    public Task<bool> ExistsAsync(int id, CancellationToken ct = default)
+        => context.Monitors.AnyAsync(m => m.Id == id, ct);
 
-    public async Task<IEnumerable<Monitor>> GetAllAsync()
-    {
-        return await _context.Monitors.AsNoTracking().ToListAsync();
-    }
-
-    public async Task<Monitor?> GetByIdAsync(int id)
-    {
-        return await _context.Monitors.FirstOrDefaultAsync(m => m.Id == id);
-    }
-
-    public async Task<IEnumerable<Monitor>> GetMonitorsReadyForCheckAsync(DateTimeOffset currentTime)
-    {
-        return await _context.Monitors
+    public async Task<IReadOnlyList<Monitor>> GetMonitorsReadyForCheckAsync(
+        DateTimeOffset currentTime, CancellationToken ct = default)
+        => await context.Monitors
             .Where(m => m.IsActive && m.NextCheckAt <= currentTime)
             .AsNoTracking()
-            .ToListAsync();
-    }
+            .ToListAsync(ct);
 
-    public async Task UpdateAsync(Monitor monitor)
-    {
-        _context.Monitors.Update(monitor);
-        await _context.SaveChangesAsync();
-    }
+    public void Add(Monitor monitor) => context.Monitors.Add(monitor);
+    public void Update(Monitor monitor) => context.Monitors.Update(monitor);
+    public void Remove(Monitor monitor) => context.Monitors.Remove(monitor);
 }

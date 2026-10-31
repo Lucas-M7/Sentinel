@@ -7,17 +7,14 @@ namespace Sentinel.Api.Repositories;
 
 public class CheckLogRepository(AppDbContext context) : ICheckLogRepository
 {
-    private readonly AppDbContext _context = context;
+    public void Add(CheckLog checkLog) => context.CheckLogs.Add(checkLog);
 
-    public async Task AddAsync(CheckLog checkLog)
-    {
-        await _context.AddAsync(checkLog);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task<IEnumerable<CheckLog>> GetLogsByMonitorIdAsync(int monitorId, int limit = 50)
-    {
-        return await _context.CheckLogs.Where(x => x.MonitorId == monitorId)
-            .OrderByDescending(x => x.CreatedAt).Take(limit).ToListAsync();
-    }
+    public async Task<IReadOnlyList<CheckLog>> GetLogsByMonitorIdAsync(
+        int monitorId, int limit = 50, CancellationToken ct = default)
+        => await context.CheckLogs
+            .AsNoTracking()
+            .Where(l => l.MonitorId == monitorId)
+            .OrderByDescending(l => l.CreatedAt)
+            .Take(limit)
+            .ToListAsync(ct);
 }

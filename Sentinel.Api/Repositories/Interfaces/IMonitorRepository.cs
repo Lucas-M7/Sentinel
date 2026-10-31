@@ -4,10 +4,11 @@ namespace Sentinel.Api.Repositories.Interfaces;
 
 public interface IMonitorRepository
 {
-    Task<IEnumerable<Monitor>> GetAllAsync();
-    Task<Monitor?> GetByIdAsync(int id);
-    Task AddAsync(Monitor monitor);
-    Task UpdateAsync(Monitor monitor);
-    Task DeleteAsync(Monitor monitor);
-    Task<IEnumerable<Monitor>> GetMonitorsReadyForCheckAsync(DateTimeOffset currentTime);
+    Task<IReadOnlyList<Monitor>> GetAllAsync(CancellationToken ct = default);
+    Task<Monitor?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<bool> ExistsAsync(int id, CancellationToken ct = default);
+    Task<IReadOnlyList<Monitor>> GetMonitorsReadyForCheckAsync(DateTimeOffset currentTime, CancellationToken ct = default);
+    void Add(Monitor monitor);
+    void Update(Monitor monitor);
+    void Remove(Monitor monitor);
 }

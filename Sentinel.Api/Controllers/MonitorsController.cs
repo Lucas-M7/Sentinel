@@ -1,44 +1,45 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Sentinel.Api.Application.Monitors.Commands;
+using Sentinel.Api.Application.Monitors.Queries;
 using Sentinel.Api.DTOs.Monitor;
-using Sentinel.Api.Services.Interfaces;
 
 namespace Sentinel.Api.Controllers;
 
 [ApiController]
 [Route("api/monitors")]
-public class MonitorsController(IMonitorService service) : ControllerBase
+public class MonitorsController(ISender sender) : ControllerBase
 {
-    private readonly IMonitorService _service = service;
-
     [HttpGet]
-    public async Task<IActionResult> GetAllMonitors()
-    {
-        var result = await _service.GetAllMonitorsAsync();
-        return Ok(result);
-    }
+    public async Task<ActionResult<IReadOnlyList<MonitorResponse>>> GetAll(CancellationToken ct)
+        => Ok(await sender.Send(new GetMonitorsQuery(), ct));
+
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<MonitorResponse>> GetById(int id, CancellationToken ct)
+        => Ok(await sender.Send(new GetMonitorByIdQuery(id), ct));
 
     [HttpPost]
-    public async Task<IActionResult> CreateMonitor([FromBody] CreateMonitorRequest request)
+    public async Task<ActionResult<MonitorResponse>> Create(CreateMonitorRequest request, CancellationToken ct)
     {
-        try
-        {
-            var result = await _service.CreateMonitorAsync(request.Name, request.Url, request.IntervalSeconds);
-            return Created(string.Empty, result);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, new { message = "Ocorreu um erro interno no servidor."});
-        }
+        var result = await sender.Send(
+            new CreateMonitorCommand(request.Name, request.Url, request.IntervalSeconds), ct);
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    [HttpGet("{id}/logs")]
-    public async Task<IActionResult> GetMonitorLogs(int id)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<MonitorResponse>> Update(int id, UpdateMonitorRequest request, CancellationToken ct)
+        => Ok(await sender.Send(
+            new UpdateMonitorCommand(id, request.Name, request.Url, request.IntervalSeconds), ct));
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
-        var result = await _service.GetMonitorLogsAsync(id);
-        return Ok(result);
+        await sender.Send(new DeleteMonitorCommand(id), ct);
+        return NoContent();
     }
+
+    [HttpGet("{id:int}/logs")]
+    public async Task<ActionResult<IReadOnlyList<CheckLogResponse>>> GetLogs(int id, CancellationToken ct)
+        => Ok(await sender.Send(new GetMonitorLogsQuery(id), ct));
 }

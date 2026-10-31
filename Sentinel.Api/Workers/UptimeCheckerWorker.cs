@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Sentinel.Api.Application.Common;
 using Sentinel.Api.Entities;
 using Sentinel.Api.Repositories.Interfaces;
 
@@ -23,6 +24,7 @@ public class UptimeCheckerWorker(
             {
                 var monitorRepository = scope.ServiceProvider.GetRequiredService<IMonitorRepository>();
                 var logRepository = scope.ServiceProvider.GetRequiredService<ICheckLogRepository>();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                 var monitorsToCheck = await monitorRepository.GetMonitorsReadyForCheckAsync(DateTimeOffset.UtcNow);
 
@@ -62,8 +64,8 @@ public class UptimeCheckerWorker(
                             responseMessage,
                             DateTimeOffset.UtcNow
                         );
-
-                        await logRepository.AddAsync(log);
+                        
+                        logRepository.Add(log);
                     }
                     catch (Exception ex)
                     {
@@ -80,11 +82,12 @@ public class UptimeCheckerWorker(
                             DateTimeOffset.UtcNow
                         );
 
-                        await logRepository.AddAsync(logErro);
+                        logRepository.Add(logErro);
                     }
 
                     monitor.ScheduleNextCheck(DateTimeOffset.UtcNow);
-                    await monitorRepository.UpdateAsync(monitor);
+                    monitorRepository.Update(monitor);
+                    await unitOfWork.SaveChangesAsync(stoppingToken);
                 }
             }
 
